@@ -32,6 +32,7 @@ export default function Header({ shop }) {
         <button
           onClick={openDrawer}
           className="relative flex items-center justify-center w-8 h-8"
+          id="cartBag"
         >
           <IconBag />
           <CartBadge dark={isHome} />
@@ -60,7 +61,6 @@ function IconBag() {
 
 function CartBadge({ dark }) {
   const { totalQuantity ,status} = useCart();
-  console.log("totalQuantity:",totalQuantity);
   if (totalQuantity < 1) {
     return null;
   }

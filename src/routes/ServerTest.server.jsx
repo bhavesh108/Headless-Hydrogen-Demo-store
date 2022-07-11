@@ -6,9 +6,11 @@ import {
   fetchSync,
   useSession,
   Seo,
+  ProductOptionsProvider,
 } from "@shopify/hydrogen";
 import { Suspense } from "react";
-import ProductCard from "../components/ProductCard.server";
+import HomeProductCard from "../components/HomeProductCard.client";
+import Modal from "../components/Modal.client";
 
 export default function ServerTest() {
   const {
@@ -28,12 +30,15 @@ export default function ServerTest() {
           <section className="w-full gap-4 md:gap-8 grid p-6 md:p-8 lg:p-12">
             <div className="grid-flow-row grid gap-2 gap-y-6 md:gap-4 lg:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {products.nodes.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductOptionsProvider data={product}>
+                  <HomeProductCard key={product.id} product={product} />
+                </ProductOptionsProvider>
               ))}
             </div>
           </section>
         </Suspense>
       </ShopifyProvider>
+      <Modal />
     </>
   );
 }
@@ -67,9 +72,23 @@ const QUERY = gql`
         title
         publishedAt
         handle
-        variants(first: 1) {
+        images(first: 2) {
+          nodes {
+            url
+            altText
+            width
+            height
+          }
+        }
+        variants(first: 100) {
           nodes {
             id
+            availableForSale
+            selectedOptions {
+              name
+              value
+            }
+
             image {
               url
               altText
