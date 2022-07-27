@@ -5,8 +5,6 @@ import {
   ProductPrice,
   BuyNowButton,
   AddToCartButton,
-  CartLineQuantityAdjustButton,
-  CartLineQuantity,
   useCart,
 } from "@shopify/hydrogen";
 import { useEffect, useRef, useState } from "react";
@@ -14,14 +12,17 @@ import Accordion from "./Accordion.client";
 import { CartDetails } from "./CartDetails.client";
 import { Drawer, useDrawer } from "./Drawer.client";
 import RecenlyViewed from "./RecentlyViewed.client";
+import styles from "../styles/ProductDetails.module.css";
+import ToggleSwitch from "./ToggleSwitch.client";
 // import AwesomeSlider from "react-awesome-slider";
 // import "react-awesome-slider/dist/styles.css";
 
 export default function ProductDetails({ product }) {
   const [viewed, setViewed] = useState({});
   const recentlyViewed = {};
+  const [recentEnabled, setRecentEnabled] = useState(true);
+  
   recentlyViewed[product.id] = product;
-  console.log(product);
   useEffect(() => {
     var viewedProducts = sessionStorage.getItem("viewedProducts");
     if (viewedProducts == null) {
@@ -29,13 +30,16 @@ export default function ProductDetails({ product }) {
       setViewed(recentlyViewed);
     } else {
       viewedProducts = JSON.parse(viewedProducts);
+      viewedProducts[product.id] !== undefined &&
+        delete viewedProducts[product.id];
       viewedProducts[product.id] = product;
       sessionStorage.setItem("viewedProducts", JSON.stringify(viewedProducts));
       setViewed(viewedProducts);
     }
   }, []);
-
+   
   const parts = product.descriptionHtml.split("<h2>").filter((item) => item);
+  
   return (
     <ProductOptionsProvider data={product}>
       <section className="w-full overflow-x-hidden gap-4 md:gap-6 grid px-6 md:px-8 lg:px-12">
@@ -45,7 +49,13 @@ export default function ProductDetails({ product }) {
               <ProductGallery media={product.media.nodes} />
             </div>
           </div>
-          <div className="sticky w-full md:mx-auto grid gap-8 p-0 md:p-6 md:px-0 top-[6rem] lg:top-[8rem] xl:top-[10rem]">
+
+          <div className="sticky w-full md:mx-auto grid gap-8 p-0 md:p-6 md:px-0 top-0 ">
+            <ToggleSwitch
+              enabled={recentEnabled}
+              setEnabled={setRecentEnabled}
+              title=" Recently Viewed Section"
+            />
             <div className="grid gap-2">
               <h1 className="text-4xl font-bold leading-10 whitespace-normal">
                 {product.title}
@@ -82,9 +92,11 @@ export default function ProductDetails({ product }) {
           </div>
         </div>
       </section>
-      {/* <section>
-        <RecenlyViewed viewed={viewed} />
-      </section> */}
+      {recentEnabled && (
+        <section>
+          <RecenlyViewed viewed={viewed} productId={product.id} />
+        </section>
+      )}
     </ProductOptionsProvider>
   );
 }
@@ -142,7 +154,10 @@ function ProductForm({ product }) {
         />
       </div>
       <div className="quantitySelector flex">
-        <span onClick={handleMinusQuantity} className="font-bold cursor-pointer selection:bg-transparent border border-cyan-600 px-4 py-3 border-r-0" >
+        <span
+          onClick={handleMinusQuantity}
+          className="font-bold cursor-pointer selection:bg-transparent border border-cyan-600 px-4 py-3 border-r-0"
+        >
           &#8722;
         </span>
         <input
@@ -150,10 +165,12 @@ function ProductForm({ product }) {
           min={1}
           value={quantity}
           defaultValue={1}
-          className="font-bold col-span-2 bg-transparent text-center focus:border-0 focus:outline-none border border-cyan-600 px-4 py-3"
-          style={{ maxWidth: "100px;" }}
+          className={`font-bold col-span-2 bg-transparent text-center focus:border-0 focus:outline-none border border-cyan-600 px-4 py-3 ${styles.max_width_100}`}
         />
-        <span onClick={handlePlusQuantity} className="font-bold cursor-pointer selection:bg-transparent border border-cyan-600 px-4 py-3 border-l-0" >
+        <span
+          onClick={handlePlusQuantity}
+          className="font-bold cursor-pointer selection:bg-transparent border border-cyan-600 px-4 py-3 border-l-0"
+        >
           &#43;
         </span>
       </div>
@@ -202,7 +219,10 @@ function PurchaseMarkup({ quantity }) {
           })
         }
       >
-        <span className="uppercase bg-cyan-500 rounded-md text-white inline-block font-medium text-center py-5 px-6 max-w-xl leading-none w-full hover:bg-cyan-800 transition-all ease-in-out duration-500" ref={buttonRef}>
+        <span
+          className="uppercase bg-cyan-500 rounded-md text-white inline-block font-medium text-center py-5 px-6 max-w-xl leading-none w-full hover:bg-cyan-800 transition-all ease-in-out duration-500"
+          ref={buttonRef}
+        >
           {isOutOfStock ? "Sold out" : "Add to cart"}
         </span>
       </AddToCartButton>
@@ -242,12 +262,11 @@ function OptionRadio({ values, name }) {
               onChange={() => setSelectedOption(name, value)}
             />
             <div
-              className={`relative leading-none border-b-[2px] cursor-pointer transition-all duration-200 rounded-full border ${
+              className={`w-9 h-9 relative leading-none border-b-[2px] cursor-pointer transition-all duration-200 rounded-full border ${
                 checked
                   ? "bg-black text-white border-transparent"
                   : "text-black bg-transparent border-black"
               }`}
-              style={{ width: "35px", height: "35px" }}
             >
               <span className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2">
                 {value[0]}
@@ -274,10 +293,10 @@ function OptionRadio({ values, name }) {
               onChange={() => setSelectedOption(name, value)}
             />
             <div
-              className={`rounded-full leading-none border-b-[2px] py-1 cursor-pointer transition-all duration-200 border-2 ${
+              className={`w-9 h-9 rounded-full leading-none border-b-[2px] py-1 cursor-pointer transition-all duration-200 border-2 ${
                 checked ? "border-black" : "border-transparent"
               }`}
-              style={{ backgroundColor: value, width: "35px", height: "35px" }}
+              style={{ backgroundColor: value }}
             ></div>
           </label>
         );
