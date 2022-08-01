@@ -1,3 +1,4 @@
+import { ShopifyAnalytics } from "@shopify/hydrogen";
 import { Suspense } from "react";
 import HeroBanner from "../components/HeroBanner.client";
 import { Layout } from "../components/Layout.server";
