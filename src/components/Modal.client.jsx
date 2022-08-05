@@ -6,8 +6,9 @@ import {
   useCart,
   useProductOptions,
 } from "@shopify/hydrogen";
+import Slider from '@ant-design/react-slick';
 import { Fragment, useEffect, useRef, useState } from "react";
-// import AwesomeSlider from "react-awesome-slider";
+
 
 export default function Modal({ product }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -153,6 +154,13 @@ function CloseIcon() {
   );
 }
 function ProductGallery({ media }) {
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
   if (!media.length) {
     return null;
   }
@@ -161,10 +169,9 @@ function ProductGallery({ media }) {
     <div
       className={`grid grid-flow-col md:p-0 w-screen md:w-full grid-cols-3 gap-2`}
     >
-      {/* <AwesomeSlider> */}
+      <Slider {...settings}>
       {media.map((med, i) => {
         let extraProps = {};
-
         if (med.mediaContentType === "MODEL_3D") {
           extraProps = {
             interactionPromptThreshold: "0",
@@ -199,7 +206,7 @@ function ProductGallery({ media }) {
           </div>
         );
       })}
-      {/* </AwesomeSlider> */}
+      </Slider>
     </div>
   );
 }
